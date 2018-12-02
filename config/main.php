@@ -1,18 +1,33 @@
 <?php
 return [
     'id' => 'playlist-generator',
-    // basePath (базовый путь) приложения будет каталог `micro-app`
     'basePath' => __DIR__ . '/../',
-    // это пространство имен где приложение будет искать все контроллеры
     'controllerNamespace' => 'app\controllers',
-    // установим псевдоним '@micro', чтобы включить автозагрузку классов из пространства имен 'micro'
     'aliases' => [
-        '@micro' => __DIR__ . '/../',
+        '@app' => __DIR__ . '/../',
     ],
     'components' => [
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
+            'rules' => [
+                [
+                    'class' => \yii\rest\UrlRule::class,
+                    'controller' => 'file',
+                    'extraPatterns' => [
+                        'POST ' => 'include',
+                    ],
+                ],
+                '/music' => 'data/mp3',
+            ],
+        ],
+        'request' => [
+            'parsers' => [
+                'application/json' => \yii\web\JsonParser::class,
+            ],
+        ],
+        'response' => [
+            'format' => \yii\web\Response::FORMAT_JSON,
         ],
     ],
 ];
