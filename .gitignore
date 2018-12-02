@@ -1,2 +1,10 @@
-/.idea
+/yii
+/yii_test
+/yii_test.bat
+.idea
+Thumbs.db
 /vendor
+composer.phar
+.DS_Store
+phpunit.phar
+/phpunit.xml
