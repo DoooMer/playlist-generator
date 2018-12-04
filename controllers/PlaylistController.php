@@ -65,6 +65,10 @@ class PlaylistController extends Controller
             throw new BadRequestHttpException('Отсутствуют необходимые данные.');
         }
 
+        if (!$form->validate()) {
+            return $form;
+        }
+
         try {
             $link = $this->playlistService->create($form->name);
             Yii::$app->getResponse()->setStatusCode(201);

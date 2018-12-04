@@ -4,6 +4,6 @@
 #EXTM3U
 <?php
 foreach ($content as $track):
-    echo $track;
+    echo $track . "\r\n";
 endforeach;
 ?>

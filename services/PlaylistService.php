@@ -160,11 +160,11 @@ class PlaylistService
             }
 
         } else {
-            $content = [];
+            throw new \RuntimeException('Нет заготовки плейлиста.');
         }
 
         if (empty($content)) {
-            throw new \RuntimeException('Плейлист пуст.');
+            throw new \RuntimeException('Нет файлов для плейлиста.');
         }
 
         file_put_contents(

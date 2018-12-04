@@ -80,12 +80,13 @@ class FileController extends Controller
      * Добавление файла в плейлист
      * @throws ServerErrorHttpException
      * @throws BadRequestHttpException
+     * @throws \yii\base\InvalidConfigException
      */
     public function actionInclude(): ?IncludeFileForm
     {
         $form = new IncludeFileForm();
 
-        if (!$form->load(Yii::$app->getRequest()->getQueryParams())) {
+        if (!$form->load(Yii::$app->getRequest()->getBodyParams())) {
             throw new BadRequestHttpException('Невозможно обработать запрос.');
         }
 

@@ -29,15 +29,11 @@ return [
                 ],
             ],
         ],
-        'playlistUrlManager' => [
-            'class' => \yii\web\UrlManager::class,
-            'enablePrettyUrl' => true,
-            'showScriptName' => false,
-            'baseUrl' => 'http://192.168.1.2:84',
-            'rules' => [
-                '/external/<filename>' => 'music/external',
-            ],
-        ],
+//        'playlistUrlManager' => [
+//            'class' => \yii\web\UrlManager::class,
+//            'enablePrettyUrl' => true,
+//            'showScriptName' => false,
+//        ],
         'request' => [
             'parsers' => [
                 'application/json' => \yii\web\JsonParser::class,
@@ -62,11 +58,15 @@ return [
     'params' => [
         'dataDirectoryAliases' => [
             // system_path => url
-            '@app/testing' => '/music/external',
         ],
     ],
     'container' => [
         'definitions' => [
+            'playlistUrlManager' => [
+                'class' => \yii\web\UrlManager::class,
+                'enablePrettyUrl' => true,
+                'showScriptName' => false,
+            ],
             \app\services\PlaylistService::class => [
                 \app\services\PlaylistService::class,
                 [
@@ -76,7 +76,7 @@ return [
                     \yii\di\Instance::of(\yii\web\View::class),
                     \yii\di\Instance::of(\app\services\FileService::class),
                 ],
-            ]
+            ],
         ],
     ],
 ];

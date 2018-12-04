@@ -11,3 +11,4 @@ phpunit.phar
 /env/logs
 /runtime/playlist/*
 /web/playlist/*
+/config/main-local.php
