@@ -2,10 +2,12 @@
 
 namespace app\controllers;
 
+use app\models\forms\IncludeFileForm;
+use app\services\FileService;
+use app\services\PlaylistService;
 use Yii;
+use yii\base\Module;
 use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
-use yii\helpers\Url;
 use yii\rest\Controller;
 use yii\web\BadRequestHttpException;
 use yii\web\ServerErrorHttpException;
@@ -15,6 +17,28 @@ use yii\web\ServerErrorHttpException;
  */
 class FileController extends Controller
 {
+    /**
+     * @var FileService
+     */
+    private $fileService;
+    /**
+     * @var PlaylistService
+     */
+    private $playlistService;
+
+    /**
+     * @inheritdoc
+     * @param FileService $fileService
+     * @param PlaylistService $playlistService
+     */
+    public function __construct(string $id, Module $module, FileService $fileService, PlaylistService $playlistService, array $config = [])
+    {
+        parent::__construct($id, $module, $config);
+
+        $this->fileService = $fileService;
+        $this->playlistService = $playlistService;
+    }
+
     /**
      * @inheritdoc
      */
@@ -28,14 +52,7 @@ class FileController extends Controller
      */
     public function actionIndex(): array
     {
-        $paths = [];
-        $pathAliases = ArrayHelper::getValue(\Yii::$app->params, 'dataDirectoryAliases', []);
-
-        foreach ($pathAliases as $path => $alias) {
-            $paths[] = sha1(Yii::getAlias($path));
-        }
-
-        return $paths;
+        return $this->fileService->getDirectoriesHash();
     }
 
     /**
@@ -48,47 +65,15 @@ class FileController extends Controller
      */
     public function actionScan(string $directory): array
     {
-        $files = [];
-        $pathAliases = ArrayHelper::getValue(\Yii::$app->params, 'dataDirectoryAliases', []);
-        $hashPaths = [];
-
-        foreach ($pathAliases as $path => $alias) {
-            $realPath = Yii::getAlias($path);
-            $hashPaths[sha1($realPath)] = $realPath;
-        }
-
-        if (!array_key_exists($directory, $hashPaths)) {
-            throw new BadRequestHttpException('Невозможно обработать запрос для заданной директории.');
-        }
-
+        $hashPaths = $this->fileService->getDirectoriesHashIndexed();
         $directoryPath = ArrayHelper::getValue($hashPaths, $directory);
 
         if (!$directoryPath) {
-            throw new ServerErrorHttpException('На стороне сервера произошла ошибка.');
+            throw new BadRequestHttpException('Невозможно обработать запрос для заданной директории.');
         }
 
-        foreach (new \FilesystemIterator($directoryPath) as $file) {
-            /** @var \SplFileInfo $file */
-            if ($file->isDir()) {
-                continue;
-            }
+        return $this->fileService->scanDirectory($directoryPath);
 
-            if (\in_array($file->getExtension(), ['json', 'm3u'])) {
-                continue;
-            }
-
-            $newName = str_replace(' ', '_', mb_strtolower($file->getBasename()));
-            rename(
-                $file->getPath() . DIRECTORY_SEPARATOR . $file->getBasename(),
-                $file->getPath() . DIRECTORY_SEPARATOR . $newName
-            );
-
-            $files[] = [
-                'basename' => $newName,
-            ];
-        }
-
-        return $files;
     }
 
     /**
@@ -96,46 +81,27 @@ class FileController extends Controller
      * @throws ServerErrorHttpException
      * @throws BadRequestHttpException
      */
-    public function actionInclude(): void
+    public function actionInclude(): ?IncludeFileForm
     {
-        $playlistName = \Yii::$app->getRequest()->getBodyParam('playlist', 'playlist');
-        $directory = \Yii::$app->getRequest()->getBodyParam('directory');
-        $basename = \Yii::$app->getRequest()->getBodyParam('basename');
+        $form = new IncludeFileForm();
 
-        $pathAliases = ArrayHelper::getValue(\Yii::$app->params, 'dataDirectoryAliases', []);
-        $hashPaths = [];
-
-        foreach ($pathAliases as $path => $alias) {
-            $realPath = Yii::getAlias($path);
-            $hashPaths[sha1($realPath)] = $realPath;
+        if (!$form->load(Yii::$app->getRequest()->getQueryParams())) {
+            throw new BadRequestHttpException('Невозможно обработать запрос.');
         }
 
-        if (!array_key_exists($directory, $hashPaths)) {
+        if (!$form->validate()) {
+            return $form;
+        }
+
+        $hashPaths = $this->fileService->getDirectoriesHashIndexed();
+
+        if (!array_key_exists($form->directory, $hashPaths)) {
             throw new BadRequestHttpException('Невозможно обработать запрос для заданной директории.');
         }
 
-        $playlistPath = \Yii::getAlias("@app/runtime/playlist/{$playlistName}.json");
-
-        if (file_exists($playlistPath)) {
-            $rawContent = file_get_contents($playlistPath);
-
-            if (!empty($rawContent)) {
-                $content = Json::decode($rawContent);
-            } else {
-                $content = [];
-            }
-
-        } else {
-            $content = [];
-        }
-
-        $files = array_unique(ArrayHelper::merge(
-            $content, [$directory . DIRECTORY_SEPARATOR . $basename]
-        ));
-        $preparedPlaylist = Json::encode($files);
-
-        file_put_contents($playlistPath, $preparedPlaylist);
+        $this->playlistService->includeFileToJson($form->playlist, $form->directory, $form->basename);
 
         \Yii::$app->getResponse()->setStatusCode(201);
+        return null;
     }
 }
