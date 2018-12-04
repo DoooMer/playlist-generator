@@ -4,7 +4,7 @@ return [
     'basePath' => __DIR__ . '/../',
     'controllerNamespace' => 'app\controllers',
     'aliases' => [
-        '@app' => __DIR__ . '/../',
+        '@app' => dirname(__DIR__),
     ],
     'components' => [
         'urlManager' => [
@@ -15,10 +15,27 @@ return [
                     'class' => \yii\rest\UrlRule::class,
                     'controller' => 'file',
                     'extraPatterns' => [
+                        'GET <directory>' => 'scan',
                         'POST ' => 'include',
+                        'POST create' => 'create',
                     ],
                 ],
-                '/music' => 'data/mp3',
+                [
+                    'class' => \yii\rest\UrlRule::class,
+                    'controller' => 'playlist',
+                    'extraPatterns' => [
+                        'POST ' => 'create',
+                    ],
+                ],
+            ],
+        ],
+        'playlistUrlManager' => [
+            'class' => \yii\web\UrlManager::class,
+            'enablePrettyUrl' => true,
+            'showScriptName' => false,
+            'baseUrl' => 'http://192.168.1.2:84',
+            'rules' => [
+                '/external/<filename>' => 'music/external',
             ],
         ],
         'request' => [
@@ -28,6 +45,24 @@ return [
         ],
         'response' => [
             'format' => \yii\web\Response::FORMAT_JSON,
+        ],
+        'log' => [
+            'traceLevel' => YII_DEBUG ? 3 : 0,
+            'targets' => [
+                [
+                    'class' => \yii\log\FileTarget::class,
+                    'levels' => ['error'],
+                    'logVars' => ['_GET', '_POST'],
+                    'exportInterval' => 1,
+                ],
+            ],
+            'flushInterval' => 1,
+        ],
+    ],
+    'params' => [
+        'dataDirectoryAliases' => [
+            // system_path => url
+            '@app/testing' => '/music/external',
         ],
     ],
 ];
