@@ -65,7 +65,7 @@ class FileController extends Controller
      */
     public function actionScan(string $directory): array
     {
-        $hashPaths = $this->fileService->getDirectoriesHashIndexed();
+        $hashPaths = $this->fileService->getDirectoriesRealPathHashIndexed();
         $directoryPath = ArrayHelper::getValue($hashPaths, $directory);
 
         if (!$directoryPath) {
@@ -93,7 +93,7 @@ class FileController extends Controller
             return $form;
         }
 
-        $hashPaths = $this->fileService->getDirectoriesHashIndexed();
+        $hashPaths = $this->fileService->getDirectoriesRealPathHashIndexed();
 
         if (!array_key_exists($form->directory, $hashPaths)) {
             throw new BadRequestHttpException('Невозможно обработать запрос для заданной директории.');

@@ -2,18 +2,35 @@
 
 namespace app\controllers;
 
+use app\models\forms\CreatePlaylistForm;
+use app\services\PlaylistService;
 use Yii;
-use yii\helpers\ArrayHelper;
-use yii\helpers\Json;
-use yii\helpers\Url;
+use yii\base\Module;
 use yii\rest\Controller;
-use yii\web\UrlManager;
+use yii\web\BadRequestHttpException;
+use yii\web\ServerErrorHttpException;
 
 /**
  * Контроллер плейлистов.
  */
 class PlaylistController extends Controller
 {
+    /**
+     * @var PlaylistService
+     */
+    private $playlistService;
+
+    /**
+     * @inheritdoc
+     * @param PlaylistService $playlistService
+     */
+    public function __construct(string $id, Module $module, PlaylistService $playlistService, array $config = [])
+    {
+        parent::__construct($id, $module, $config);
+
+        $this->playlistService = $playlistService;
+    }
+
     /**
      * @inheritdoc
      */
@@ -29,23 +46,7 @@ class PlaylistController extends Controller
      */
     public function actionIndex()
     {
-        $directory = Yii::getAlias('@app/web/playlist');
-        $playlists = [];
-
-        foreach (new \DirectoryIterator($directory) as $file) {
-
-            if ($file->isDir() || $file->getExtension() !== 'm3u') {
-                continue;
-            }
-
-            $playlists[] = [
-                'name' => $file->getBasename('.' . $file->getExtension()),
-                'link' => Url::to("/playlist/{$file->getFilename()}", true),
-            ];
-
-        }
-
-        return $playlists;
+        return $this->playlistService->getAll();
     }
 
     /**
@@ -53,48 +54,24 @@ class PlaylistController extends Controller
      *
      * @return string
      * @throws \yii\base\InvalidConfigException
+     * @throws BadRequestHttpException
+     * @throws ServerErrorHttpException
      */
     public function actionCreate()
     {
-        $playlistName = \Yii::$app->getRequest()->getBodyParam('playlist', 'playlist');
-        $playlistPath = \Yii::getAlias("@app/runtime/playlist/{$playlistName}.json");
+        $form = new CreatePlaylistForm();
 
-        if (file_exists($playlistPath)) {
-            $rawContent = file_get_contents($playlistPath);
-
-            if (!empty($rawContent)) {
-                $content = Json::decode($rawContent);
-                $pathAliases = ArrayHelper::getValue(\Yii::$app->params, 'dataDirectoryAliases', []);
-                $hashPaths = [];
-
-                foreach ($pathAliases as $path => $alias) {
-                    $hashPaths[sha1(Yii::getAlias($path))] = $alias;
-                }
-
-                /** @var UrlManager $urlManager */
-                $urlManager = Yii::$app->get('playlistUrlManager');
-
-                foreach ($content as $i => $record) {
-                    [$directory, $filename] = explode('/', $record);
-                    $alias = ArrayHelper::getValue($hashPaths, $directory);
-                    $content[$i] = $urlManager->createAbsoluteUrl([$alias, 'filename' => $filename], true);
-                }
-
-            } else {
-                $content = [];
-            }
-
-        } else {
-            $content = [];
+        if (!$form->load(Yii::$app->getRequest()->getBodyParams())) {
+            throw new BadRequestHttpException('Отсутствуют необходимые данные.');
         }
 
-        file_put_contents(
-            Yii::getAlias("@app/web/playlist/{$playlistName}.m3u"),
-            $this->renderFile('@app/views/m3u.php', compact('content'))
-        );
+        try {
+            $link = $this->playlistService->create($form->name);
+            Yii::$app->getResponse()->setStatusCode(201);
 
-        Yii::$app->getResponse()->setStatusCode(201);
-
-        return Url::to("/playlist/{$playlistName}.m3u", true);
+            return $link;
+        } catch (\RuntimeException $e) {
+            throw new ServerErrorHttpException('Не удалось создать плейлист: ' . $e->getMessage());
+        }
     }
 }

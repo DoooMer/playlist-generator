@@ -23,13 +23,13 @@ class FileService
         $pathAliases = $this->dataDirectories;
 
         foreach ($pathAliases as $path => $alias) {
-            $paths[] = sha1(Yii::getAlias($path));
+            $paths[] = $this->buildHashPath($path);
         }
 
         return $paths;
     }
 
-    public function getDirectoriesHashIndexed(): array
+    public function getDirectoriesRealPathHashIndexed(): array
     {
         $pathAliases = $this->dataDirectories;
         $hashPaths = [];
@@ -37,6 +37,17 @@ class FileService
         foreach ($pathAliases as $path => $alias) {
             $realPath = Yii::getAlias($path);
             $hashPaths[sha1($realPath)] = $realPath;
+        }
+
+        return $hashPaths;
+    }
+
+    public function getDirectoriesAliasHashIndexed(): array
+    {
+        $hashPaths = [];
+
+        foreach ($this->dataDirectories as $path => $alias) {
+            $hashPaths[$this->buildHashPath($path)] = $alias;
         }
 
         return $hashPaths;
@@ -54,7 +65,7 @@ class FileService
 
             $newName = str_replace(' ', '_', mb_strtolower($file->getBasename()));
 
-            $files[] = $newName; // $file->getBasename();
+            $files[] = $newName; // @todo: $file->getBasename();
         }
 
         return $files;
@@ -66,5 +77,10 @@ class FileService
             $path . DIRECTORY_SEPARATOR . $oldName,
             $path . DIRECTORY_SEPARATOR . $newName
         );
+    }
+
+    private function buildHashPath(string $path): string
+    {
+        return sha1(Yii::getAlias($path));
     }
 }

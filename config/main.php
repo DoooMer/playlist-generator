@@ -65,4 +65,18 @@ return [
             '@app/testing' => '/music/external',
         ],
     ],
+    'container' => [
+        'definitions' => [
+            \app\services\PlaylistService::class => [
+                \app\services\PlaylistService::class,
+                [
+                    '@app/runtime/playlist',
+                    '@app/web/playlist',
+                    \yii\di\Instance::of('playlistUrlManager'),
+                    \yii\di\Instance::of(\yii\web\View::class),
+                    \yii\di\Instance::of(\app\services\FileService::class),
+                ],
+            ]
+        ],
+    ],
 ];
