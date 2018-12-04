@@ -11,6 +11,7 @@ return [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                '' => 'hello/index',
                 [
                     'class' => \yii\rest\UrlRule::class,
                     'controller' => 'file',
@@ -29,11 +30,6 @@ return [
                 ],
             ],
         ],
-//        'playlistUrlManager' => [
-//            'class' => \yii\web\UrlManager::class,
-//            'enablePrettyUrl' => true,
-//            'showScriptName' => false,
-//        ],
         'request' => [
             'parsers' => [
                 'application/json' => \yii\web\JsonParser::class,
