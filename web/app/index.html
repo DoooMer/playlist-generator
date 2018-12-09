@@ -1,14 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <title>Playlist generator</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 </head>
-<body>
-    1. Set name for the future playlist or select existed<br>
+<body class="teal lighten-5">
+    <!--1. Set name for the future playlist or select existed<br>
     2. Choose files<br>
     3. Create or update your playlist<br>
     4. Download him and listen<br>
-    5. Profit<br>
+    5. Profit<br>-->
+
+    <div id="app" class="container">
+        <div class="row">
+            <div class="col l12">
+                <!--todo: add start page with list of existed playlists-->
+                <!--todo: add page or modal with list of files in selected playlist-->
+                <h4 class="teal-text text-lighten-1">Создание плейлиста</h4>
+            </div>
+            <div class="col l12">
+                <div class="row" v-show="showStep1">
+                    <div class="input-field col l12">
+                        <!--name of playlist or choose existed-->
+                        <input type="text" id="playlistName" class="autocomplete" v-model="playlistName" required>
+                        <label for="playlistName">Название</label>
+                        <!--todo: add hint about existed playlists-->
+                    </div>
+                </div>
+                <div class="row" v-show="showStep2">
+                    <div class="input-field col l4">
+                        <!--choose directory-->
+                        <!--todo: use tabs-->
+                        <div v-for="dir in directories">
+                            <p class="truncate">
+                                <label>
+                                    <input type="radio" :value="dir" v-model="directory"/>
+                                    <span>{{ dir }}</span>
+                                    <!--todo: add show alias of folder name-->
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="input-field col l8">
+                        <!--choose files in directory-->
+                        <div v-for="f in files">
+                            <p>
+                                <label>
+                                    <input type="checkbox" :value="f" v-model="selection"/>
+                                    <span>{{ f }}</span>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="input-field col l12">
+                        <!--list of selected files-->
+                        <!--todo: show all selected files in one list with scroll-->
+                    </div>
+                </div>
+                <div class="row" v-if="showStep3">
+                    <div class="input-field col l12">
+                        <!--create button-->
+                        <button @click="send" v-if="!creationInProgress && downloadLink.length == 0" class="waves-effect waves-light btn">Создать</button>
+                        <div class="progress" v-if="creationInProgress">
+                            <div class="indeterminate"></div>
+                        </div>
+                        <!--download link-->
+                        <a :href="downloadLink" v-if="!creationInProgress && downloadLink.length > 0">Скачать</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!--<script src="/app/js/vue.js"></script>-->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/app/js/main.js"></script>
 </body>
 </html>
