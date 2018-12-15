@@ -18,7 +18,6 @@ return [
                     'extraPatterns' => [
                         'GET <directory>' => 'scan',
                         'POST ' => 'include',
-                        'POST create' => 'create',
                     ],
                 ],
                 [
