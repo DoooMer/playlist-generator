@@ -66,6 +66,8 @@ class FileService
             $files[] = $file->getBasename();
         }
 
+        sort($files);
+
         return $files;
     }
 
