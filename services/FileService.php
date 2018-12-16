@@ -23,7 +23,10 @@ class FileService
         $pathAliases = $this->dataDirectories;
 
         foreach ($pathAliases as $path => $alias) {
-            $paths[] = $this->buildHashPath($path);
+            $paths[] = [
+                'path' => $this->buildHashPath($path),
+                'name' => $alias,
+            ];
         }
 
         return $paths;

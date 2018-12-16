@@ -44,7 +44,7 @@
                         <p class="grey-text text-lighten-1" v-if="directories.length">Директории</p>
                         <!--todo: add show alias of folder name-->
                         <div class="collection">
-                            <a v-for="dir in directories" href="javascript:return false;" @click="selectDir(dir.name)" :class="{active: directory==dir.name}" class="grey-text text-darken-3 collection-item waves-effect waves-light">{{ dir.name }}</a>
+                            <a v-for="dir in directories" href="javascript:return false;" @click="selectDir(dir)" :class="{active: directory==dir.path}" class="grey-text text-darken-3 collection-item waves-effect waves-light">{{ dir.name }}</a>
                         </div>
                     </div>
                     <div class="input-field col l6">

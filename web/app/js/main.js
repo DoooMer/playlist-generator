@@ -117,9 +117,7 @@
 
             service.loadDirectories()
                 .then((response) => {
-                    response.data.forEach((dir) => {
-                        that.directories.push({'name': dir, 'tab': '#' + dir});
-                    });
+                    that.directories = response.data;
                 });
         },
         methods: {
@@ -141,8 +139,8 @@
                         that.creationInProgress = false;
                     });
             },
-            selectDir: function (name) {
-                this.directory = name;
+            selectDir: function (dir) {
+                this.directory = dir.path;
             },
         },
     });
