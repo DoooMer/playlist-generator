@@ -59,13 +59,11 @@ class FileService
 
         foreach (new \FilesystemIterator($directoryPath) as $file) {
             /** @var \SplFileInfo $file */
-            if ($file->isDir()) {
+            if ($file->isDir() || $file->getExtension() !== 'mp3') {
                 continue;
             }
 
-            $newName = str_replace(' ', '_', mb_strtolower($file->getBasename()));
-
-            $files[] = $newName; // @todo: $file->getBasename();
+            $files[] = $file->getBasename();
         }
 
         return $files;
