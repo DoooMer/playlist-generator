@@ -6,6 +6,15 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        .collection a.collection-item:hover, .collection a.collection-item:not(.active):hover {
+            color: #fff !important;
+            background-color: #26a69a !important;
+        }
+        .collection a.collection-item.active {
+            color: #fff !important;
+        }
+    </style>
 </head>
 <body class="teal lighten-5">
     <!--1. Set name for the future playlist or select existed<br>
@@ -31,26 +40,21 @@
                     </div>
                 </div>
                 <div class="row" v-show="showStep2">
-                    <div class="input-field col l4">
-                        <!--choose directory-->
-                        <!--todo: use tabs-->
-                        <div v-for="dir in directories">
-                            <p class="truncate">
-                                <label>
-                                    <input type="radio" :value="dir" v-model="directory"/>
-                                    <span>{{ dir }}</span>
-                                    <!--todo: add show alias of folder name-->
-                                </label>
-                            </p>
+                    <div class="col l12">
+                        <p class="grey-text text-lighten-1" v-if="directories.length">Директории</p>
+                        <!--todo: add show alias of folder name-->
+                        <div class="collection">
+                            <a v-for="dir in directories" href="javascript:return false;" @click="selectDir(dir.name)" :class="{active: directory==dir.name}" class="grey-text text-darken-3 collection-item waves-effect waves-light">{{ dir.name }}</a>
                         </div>
                     </div>
-                    <div class="input-field col l8">
+                    <div class="input-field col l6">
                         <!--choose files in directory-->
+                        <p class="grey-text text-lighten-1" v-if="files.length">Файлы</p>
                         <div v-for="f in files">
                             <p>
                                 <label>
                                     <input type="checkbox" :value="f" v-model="selection"/>
-                                    <span>{{ f }}</span>
+                                    <span class="grey-text text-darken-3">{{ f }}</span>
                                 </label>
                             </p>
                         </div>

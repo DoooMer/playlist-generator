@@ -65,6 +65,9 @@
                 });
                 this._autocompleteInstance.updateData(data);
             },
+            directories: function (val) {
+
+            },
             playlistName: function (val) {
                 if (this.playlistName.length > 0) {
                     this.showStep2 = true;
@@ -114,7 +117,9 @@
 
             service.loadDirectories()
                 .then((response) => {
-                    that.directories = response.data;
+                    response.data.forEach((dir) => {
+                        that.directories.push({'name': dir, 'tab': '#' + dir});
+                    });
                 });
         },
         methods: {
@@ -135,6 +140,9 @@
                     .finally(() => {
                         that.creationInProgress = false;
                     });
+            },
+            selectDir: function (name) {
+                this.directory = name;
             },
         },
     });
